@@ -1,5 +1,5 @@
 # coder :- DZ
 # coding=utf8
 
-token = '528345100:AAHfmh-NWSpNU_Xqf94WL69x9WQZVNL5hMk'
+token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' # Insert your token from BotFather
 db_file = 'config.json'
