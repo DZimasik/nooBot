@@ -621,6 +621,35 @@ def callback_from_buttons(call):
             keyboard = show_keyboard(service_buttons=[correct, add])        
             bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Настройки сценариев", reply_markup=keyboard)            
         
+        
+        
+        elif link == "preset_set/correct":
+            back = types.InlineKeyboardButton(text="Назад \U000021A9", callback_data=backwards_path(callback[call.from_user.id], -1))
+            cannel = types.InlineKeyboardButton(text="Отмена \U0000274C", callback_data=callback[call.from_user.id]+"/cannel")             
+            keys = database.view_rows(data, "preset")
+            
+            if keys:              
+                keyboard = show_keyboard(data, callback[call.from_user.id], keys, service_buttons=[back, cannel])
+                bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Сценарии", reply_markup=keyboard)
+            else:
+                keyboard = show_keyboard(service_buttons=[back, cannel])
+                bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Хммм, похоже у вас ещё не настроены сценарии. Для настройки сценариев перейдите в раздел Настройки > Сценарии > Создать сценарий", reply_markup=keyboard)
+        
+        elif link == "preset_set/correct/preset/":
+            preset_id = steps[3]
+            preset_name = data["preset"][preset_id]["name"] 
+            add_device = types.InlineKeyboardButton(text="Добавить устройства", callback_data=callback[call.from_user.id]+"/fill")
+            del_device = types.InlineKeyboardButton(text="Убрать устройства", callback_data=callback[call.from_user.id]+"/empty")
+            set_preset = types.InlineKeyboardButton(text="Настроить сценарий", callback_data=callback[call.from_user.id]+"/set")
+            rename = types.InlineKeyboardButton(text="Переименовать", callback_data=callback[call.from_user.id]+"/rename")
+            del_preset = types.InlineKeyboardButton(text="Удалить", callback_data=callback[call.from_user.id]+"/del")
+            back = types.InlineKeyboardButton(text="Назад \U000021A9", callback_data=backwards_path(callback[call.from_user.id], -2))
+            cannel = types.InlineKeyboardButton(text="Отмена \U0000274C", callback_data=callback[call.from_user.id]+"/cannel")
+            keyboard = show_keyboard(service_buttons=[add_device, del_device, set_preset, rename, del_preset, back, cannel])        
+            bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Настройки сценария "+preset_name, reply_markup=keyboard)      
+        
+        
+        
         elif link == "preset_set/add":
             free_ID = database.free_ID(data, "preset")
             
