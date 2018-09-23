@@ -283,11 +283,10 @@ def callback_from_buttons(call):
     
     
     if owner or guest:
-        print(str(datetime.datetime.now()), "Callback answer from", call.from_user.first_name, call.from_user.last_name, '>>', call.data)
+        print(str(datetime.datetime.now()), call.from_user.first_name, call.from_user.last_name, '>>', call.data)
         callback[call.from_user.id] = update_path(call.data)  
         link = make_link(callback[call.from_user.id].split('|')[-1])
-        steps = callback[call.from_user.id].split('|')[-1].split("/")
-   
+        steps = callback[call.from_user.id].split('|')[-1].split("/")   
 
     if owner:
         if link == "pl_set":
@@ -367,11 +366,8 @@ def callback_from_buttons(call):
                     data["device"][device_id]["ID_place"] = int(place_id)
                 
                 if database.save(config.db_file, data):
-                    if len(device_names) == 1:
-                        text = "Устройство "+device_name+" добавлено в комнату "+place_name
-                    else: 
-                        names = ' и '.join([', '.join(device_names[:-1]), device_names[-1]])
-                        text = "Устройства "+names+" добавлены в комнату "+place_name  
+                    if len(device_names) == 1: text = "Устройство "+device_name+" добавлено в комнату "+place_name
+                    else: text = "Устройства "+' и '.join([', '.join(device_names[:-1]), device_names[-1]])+" добавлены в комнату "+place_name  
                     bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text=text, reply_markup=keyboard)
             else:
                 bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Вы ничего не добавили в комнату "+place_name, reply_markup=keyboard)
@@ -423,11 +419,8 @@ def callback_from_buttons(call):
                     data["device"][device_id]["ID_place"] = None 
                 
                 if database.save(config.db_file, data):
-                    if len(device_names) == 1:
-                        text = "Устройство "+device_name+" убрано из комнаты "+place_name
-                    else:    
-                        names = ' и '.join([', '.join(device_names[:-1]), device_names[-1]])
-                        text = "Устройства "+names+" убраны из комнаты "+place_name  
+                    if len(device_names) == 1: text = "Устройство "+device_name+" убрано из комнаты "+place_name
+                    else: text = "Устройства "+' и '.join([', '.join(device_names[:-1]), device_names[-1]])+" убраны из комнаты "+place_name  
                     bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text=text, reply_markup=keyboard)
             else:
                 bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Вы ничего не убрали из комнаты "+place_name, reply_markup=keyboard)
@@ -780,17 +773,13 @@ def callback_from_buttons(call):
                 bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Настройте устройства, которое будут участвовать в сценарии "+preset_name, reply_markup=keyboard)
             
         elif link in  ("pr_set/add/dev//fol/dev/", "pr_set/add/dev//fol/dev/:,,", "pr_set/corr/pr//fill/dev//fol/dev/", "pr_set/corr/pr//fill/dev//fol/dev/:,,"):
-            device_id = steps[6].split(":")[0]
+            device_id = steps[-1].split(":")[0] # Change to negative step in all links!!!
+            keys = device_id
+            dev = steps[-1].split(":")
             back = types.InlineKeyboardButton(text="Назад \U000021A9", callback_data=backwards_path(callback[call.from_user.id], -2))
             cannel = types.InlineKeyboardButton(text="Отмена \U0000274C", callback_data=callback[call.from_user.id]+"/cannel")            
-            keys = device_id
-            
+
             if keys and link in ("pr_set/add/dev//fol/dev/:,,", "pr_set/corr/pr//fill/dev//fol/dev/:,,"):
-                if link == "pr_set/add/dev//fol/dev/:,,":
-                    dev = steps[6].split(":")
-                elif link == "pr_set/corr/pr//fill/dev//fol/dev/:,,":
-                    dev = steps[9].split(":")
-                
                 form[call.from_user.id]["devices"][device_id] = dev[1]
                 if data["device"].get(dev[0]):
                     CH = data["device"][dev[0]]["CH"]
@@ -808,14 +797,28 @@ def callback_from_buttons(call):
             back = types.InlineKeyboardButton(text="Назад \U000021A9", callback_data=backwards_path(callback[call.from_user.id], -5))
             cannel = types.InlineKeyboardButton(text="Отмена \U0000274C", callback_data=callback[call.from_user.id]+"/cannel")
             keyboard = show_keyboard(service_buttons=[back, cannel])
+                 
+            device_names = list()
+            for key in form[call.from_user.id]["devices"].keys(): # Check it up to code!!!
+                device_name = data["device"][key]["name"]
+                device_names.append(device_name)
             
-            if free_ID is not None:
+            if len(device_names) == 1: names = device_name
+            else: names = ' и '.join([', '.join(device_names[:-1]), device_names[-1]])
+            
+            if link == "pr_set/add/dev//fol/save" and free_ID is not None:
                 for key in form[call.from_user.id]["devices"].keys():
                     data["device"][key]["ID_preset"][free_ID] = form[call.from_user.id]["devices"][key]
                 data = database.new_row(data, "preset", form[call.from_user.id]["preset"], free_ID)
-            
                 if database.save(config.db_file, data): 
-                    bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Создан новый сценарий "+preset_name, reply_markup=keyboard)
+                    bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Создан новый сценарий "+preset_name+" с устройствами "+names, reply_markup=keyboard)
+            
+            elif link == "pr_set/corr/pr//fill/dev//fol/save":
+                device_id = steps[-6]
+                for key in form[call.from_user.id]["devices"].keys():
+                    data["device"][key]["ID_preset"][device_id] = form[call.from_user.id]["devices"][key]                 
+                if database.save(config.db_file, data): 
+                    bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Устройства "+names+" добавлены в сценарий "+preset_name, reply_markup=keyboard)
         
         elif link == "us-s_set":
             owners = types.InlineKeyboardButton(text="Хозяева", callback_data=callback[call.from_user.id]+"/ow-s")
@@ -994,7 +997,7 @@ def callback_from_buttons(call):
                     fmt = int(pack[CH].split(',')[1])
                     dat = int(pack[CH].split(',')[2])                    
                     mtrf.tx_command(channel=CH, cmd=cmd, fmt=fmt, dat=dat)
-                    time.sleep(0.3)
+                    time.sleep(0.35)
                     
                 preset = show_keyboard(data, update_path("view"), database.view_rows(data, "preset"))
                 bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Сценарии", reply_markup=preset)
