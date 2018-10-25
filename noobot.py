@@ -664,7 +664,7 @@ def callback_from_buttons(call):
             keys = database.view_rows(data, "device")
             fill_device_id = list()
             
-            for key in keys:
+            for key in keys:    # Check it!
                 if not data["device"][key]["ID_preset"].get(preset_id):
                     fill_device_id.append(key)
             
@@ -802,23 +802,26 @@ def callback_from_buttons(call):
             for key in form[call.from_user.id]["devices"].keys(): # Check it up to code!!!
                 device_name = data["device"][key]["name"]
                 device_names.append(device_name)
-            
-            if len(device_names) == 1: names = device_name
-            else: names = ' и '.join([', '.join(device_names[:-1]), device_names[-1]])
-            
+
             if link == "pr_set/add/dev//fol/save" and free_ID is not None:
+                if len(device_names) == 1: text = "Создан новый сценарий "+preset_name+" с устройством "+device_names[-1]
+                else: text =  "Создан новый сценарий "+preset_name+" с устройствами "+' и '.join([', '.join(device_names[:-1]), device_names[-1]])
+                
                 for key in form[call.from_user.id]["devices"].keys():
                     data["device"][key]["ID_preset"][free_ID] = form[call.from_user.id]["devices"][key]
                 data = database.new_row(data, "preset", form[call.from_user.id]["preset"], free_ID)
                 if database.save(config.db_file, data): 
-                    bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Создан новый сценарий "+preset_name+" с устройствами "+names, reply_markup=keyboard)
+                    bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text=text, reply_markup=keyboard)
             
             elif link == "pr_set/corr/pr//fill/dev//fol/save":
+                if len(device_names) == 1: text = "Устройство "+device_names[-1]+" добавлено в сценарий "+preset_name
+                else: text =  "Устройства "+' и '.join([', '.join(device_names[:-1]), device_names[-1]])+" добавлены в сценарий "+preset_name               
+                
                 device_id = steps[-6]
                 for key in form[call.from_user.id]["devices"].keys():
                     data["device"][key]["ID_preset"][device_id] = form[call.from_user.id]["devices"][key]                 
                 if database.save(config.db_file, data): 
-                    bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text="Устройства "+names+" добавлены в сценарий "+preset_name, reply_markup=keyboard)
+                    bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text=text, reply_markup=keyboard)
         
         elif link == "us-s_set":
             owners = types.InlineKeyboardButton(text="Хозяева", callback_data=callback[call.from_user.id]+"/ow-s")
