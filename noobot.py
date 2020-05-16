@@ -856,11 +856,11 @@ def callback_from_buttons(call):
                 bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text=e_text, reply_markup=keyboard)
         
         elif link in ("us-s_set/ow-s/ow/", "us-s_set/gu-s/gu/", "us-s_set/pa-s/pa/"):
-            if steps[2] == "ow"
+            if steps[2] == "ow":
                 table = "owner"
-            elif steps[2] == "gu"
+            elif steps[2] == "gu":
                 table = "guest"
-            elif steps[2] == "pa"
+            elif steps[2] == "pa":
                 table = "passer"    
             
             user_id = steps[3]
@@ -873,13 +873,13 @@ def callback_from_buttons(call):
                 set_guest = types.InlineKeyboardButton(text="Сделать гостем", callback_data=callback[call.from_user.id]+"/set_gu")
                 del_user = types.InlineKeyboardButton(text="Удалить", callback_data=callback[call.from_user.id]+"/del")
                 
-                if table == "ow":
+                if table == "owner":
                     buttons = [set_guest, del_user, back, cannel]
                     text = "Настройки хозяина "+user_name
-                elif table == "gu":
+                elif table == "guest":
                     buttons = [set_owner, del_user, back, cannel]
                     text = "Настройки гостя "+user_name
-                elif table == "pa":
+                elif table == "passer":
                     buttons = [set_owner, set_guest, del_user, back, cannel]
                     text = "Настройки подписчика "+user_name
                 
