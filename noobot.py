@@ -893,7 +893,13 @@ def callback_from_buttons(call):
                       "us-s_set/gu-s/gu//set_ow", "us-s_set/gu-s/gu//del",
                       "us-s_set/pa-s/pa//set_ow", "us-s_set/pa-s/pa//set_gu", "us-s_set/pa-s/pa//del"):
             
-            table = "owner"
+            if steps[2] == "ow":
+                table = "owner"
+            elif steps[2] == "gu":
+                table = "guest"
+            elif steps[2] == "pa":
+                table = "passer"
+                
             user_id = steps[3]
             action = steps[4] 
             
