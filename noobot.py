@@ -856,7 +856,13 @@ def callback_from_buttons(call):
                 bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text=e_text, reply_markup=keyboard)
         
         elif link in ("us-s_set/ow-s/ow/", "us-s_set/gu-s/gu/", "us-s_set/pa-s/pa/"):
-            table = steps[2]
+            if steps[2] == "ow"
+                table = "owner"
+            elif steps[2] == "gu"
+                table = "guest"
+            elif steps[2] == "pa"
+                table = "passer"    
+            
             user_id = steps[3]
             back = types.InlineKeyboardButton(text="Назад \U000021A9", callback_data=backwards_path(callback[call.from_user.id], -1))
             cannel = types.InlineKeyboardButton(text="Отмена \U0000274C", callback_data=callback[call.from_user.id]+"/cannel")            
